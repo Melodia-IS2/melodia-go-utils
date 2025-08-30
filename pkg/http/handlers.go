@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	pkgErrors "melodia/pkg/errors"
-	"melodia/pkg/router"
+	pkgErrors "github.com/Melodia-IS2/melodia-go-utils/pkg/errors"
+	"github.com/Melodia-IS2/melodia-go-utils/pkg/router"
 
 	"github.com/go-playground/validator"
 )

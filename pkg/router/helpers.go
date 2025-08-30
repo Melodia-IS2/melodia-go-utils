@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	pkgErrors "melodia/pkg/errors"
+	pkgErrors "github.com/Melodia-IS2/melodia-go-utils/pkg/errors"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"

@@ -1,4 +1,4 @@
-module github.com/ignfernandez/melodia-go-utils
+module github.com/Melodia-IS2/melodia-go-utils
 
 go 1.24.5
 
