@@ -91,6 +91,16 @@ func (rt *Router) Get(path string, handler func(w http.ResponseWriter, r *http.R
 	rt.router.Get(path, rt.executeHandler(handler))
 }
 
+func (rt *Router) Group(fn func(r *Router)) {
+	rt.router.Group(func(r chi.Router) {
+		subRouter := &Router{
+			router:       r.(*chi.Mux),
+			errorHandler: rt.errorHandler,
+		}
+		fn(subRouter)
+	})
+}
+
 func (rt *Router) Post(path string, handler func(w http.ResponseWriter, r *http.Request) error) {
 	rt.router.Post(path, rt.executeHandler(handler))
 }
