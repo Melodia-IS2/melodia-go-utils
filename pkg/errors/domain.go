@@ -67,3 +67,21 @@ func NewBadRequestError(msg string) *AppError {
 		HTTPCode: http.StatusBadRequest,
 	}
 }
+
+func NewUnauthorizedError(msg string) *AppError {
+	return &AppError{
+		Code:     "UNAUTHORIZED",
+		Title:    "Unauthorized",
+		Message:  msg,
+		HTTPCode: http.StatusUnauthorized,
+	}
+}
+
+func NewTokenExpiredError(msg string) *AppError {
+	return &AppError{
+		Code:     "TOKEN_EXPIRED",
+		Title:    "Token Expired",
+		Message:  msg,
+		HTTPCode: http.StatusUnauthorized,
+	}
+}

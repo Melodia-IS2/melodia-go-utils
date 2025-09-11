@@ -51,6 +51,12 @@ func (rt *Router) Use(middlewares ...func(http.Handler) http.Handler) {
 	rt.router.Use(middlewares...)
 }
 
+func (rt *Router) UseErrorMiddleware(middlewares ...func(w http.ResponseWriter, r *http.Request) error) {
+	for _, middleware := range middlewares {
+		rt.router.Use(rt.executeMiddleware(middleware))
+	}
+}
+
 func (rt *Router) Route(path string, fn func(r Router)) {
 	rt.router.Route(path, func(r chi.Router) {
 		subRouter := &Router{
@@ -66,6 +72,18 @@ func (rt *Router) executeHandler(handler func(w http.ResponseWriter, r *http.Req
 		if err := handler(w, r); err != nil {
 			rt.errorHandler(w, r, err)
 		}
+	}
+}
+
+func (rt *Router) executeMiddleware(middleware func(w http.ResponseWriter, r *http.Request) error) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if err := middleware(w, r); err != nil {
+				rt.errorHandler(w, r, err)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
 	}
 }
 
