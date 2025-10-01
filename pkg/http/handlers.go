@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	pkgErrors "github.com/Melodia-IS2/melodia-go-utils/pkg/errors"
@@ -12,6 +11,12 @@ import (
 
 	"github.com/go-playground/validator"
 )
+
+var exposeErrorDetail = false
+
+func SetExposeErrorDetail(value bool) {
+	exposeErrorDetail = value
+}
 
 func ErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	var appError *pkgErrors.AppError
@@ -25,8 +30,7 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 		})
 	} else {
 		detail := "An unexpected error occurred"
-		environment := os.Getenv("ENVIRONMENT")
-		if environment == "development" {
+		if exposeErrorDetail {
 			detail = err.Error()
 		}
 		router.JSON(w, http.StatusInternalServerError, pkgErrors.ErrorResponse{

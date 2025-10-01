@@ -112,3 +112,7 @@ func (rt *Router) Put(path string, handler func(w http.ResponseWriter, r *http.R
 func (rt *Router) Delete(path string, handler func(w http.ResponseWriter, r *http.Request) error) {
 	rt.router.Delete(path, rt.executeHandler(handler))
 }
+
+type CanRegister interface {
+	Register(rt *Router)
+}

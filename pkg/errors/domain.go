@@ -85,3 +85,21 @@ func NewTokenExpiredError(msg string) *AppError {
 		HTTPCode: http.StatusUnauthorized,
 	}
 }
+
+func NewInternalServerError(msg string) *AppError {
+	return &AppError{
+		Code:     "INTERNAL_SERVER_ERROR",
+		Title:    "Internal Server Error",
+		Message:  msg,
+		HTTPCode: http.StatusInternalServerError,
+	}
+}
+
+func NewUnprocessableEntityError(msg string) *AppError {
+	return &AppError{
+		Code:     "UNPROCESSABLE_ENTITY",
+		Title:    "Unprocessable Entity",
+		Message:  msg,
+		HTTPCode: http.StatusUnprocessableEntity,
+	}
+}
