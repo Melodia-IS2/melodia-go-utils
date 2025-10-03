@@ -8,20 +8,25 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func ReadClaims(r *http.Request, JWTSecretKey string) (jwt.MapClaims, error) {
+func ReadClaims(r *http.Request, JWTSecretKey string) (string, jwt.MapClaims, error) {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
-		return nil, fmt.Errorf("missing authentication token")
+		return "", nil, fmt.Errorf("missing authentication token")
 	}
 
 	tokenParts := strings.Split(tokenString, " ")
 	if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-		return nil, fmt.Errorf("invalid format for authentication token. Must be 'Bearer myToken'")
+		return "", nil, fmt.Errorf("invalid format for authentication token. Must be 'Bearer myToken'")
 	}
 
 	tokenString = tokenParts[1]
 
-	return verifyToken(tokenString, JWTSecretKey)
+	claims, err := verifyToken(tokenString, JWTSecretKey)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return tokenString, claims, nil
 }
 
 func verifyToken(tokenString string, JWTSecretKey string) (jwt.MapClaims, error) {

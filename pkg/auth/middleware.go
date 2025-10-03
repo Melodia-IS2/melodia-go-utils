@@ -20,7 +20,7 @@ func NewAuthMiddleware(secretKey string) *AuthMiddleware {
 
 func (a *AuthMiddleware) AuthMiddleware(next func(w http.ResponseWriter, r *http.Request) error) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		claims, err := ReadClaims(r, a.JWTSecretKey)
+		token, claims, err := ReadClaims(r, a.JWTSecretKey)
 		if err != nil {
 			return errors.NewUnauthorizedError(err.Error())
 		}
@@ -47,6 +47,7 @@ func (a *AuthMiddleware) AuthMiddleware(next func(w http.ResponseWriter, r *http
 		ctx = context.WithValue(ctx, "expirationDate", expirationDate)
 		ctx = context.WithValue(ctx, "state", strings.ToUpper(claims["state"].(string)))
 		ctx = context.WithValue(ctx, "rol", strings.ToUpper(claims["rol"].(string)))
+		ctx = context.WithValue(ctx, "token", token)
 
 		return next(w, r.WithContext(ctx))
 	}
