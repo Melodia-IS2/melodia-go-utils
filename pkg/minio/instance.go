@@ -14,7 +14,7 @@ type MinioInstanceCfg struct {
 	UseSSL    bool
 }
 
-func NewMinioInstance(cfg MinioInstanceCfg) (*minio.Client, error) {
+func NewMinioInstance(cfg *MinioInstanceCfg) (*minio.Client, error) {
 	if cfg.Endpoint == "" || cfg.AccessKey == "" || cfg.SecretKey == "" {
 		return nil, fmt.Errorf("missing required Minio environment variables")
 	}

@@ -1,0 +1,15 @@
+package minio
+
+import (
+	"context"
+	"io"
+	"mime/multipart"
+)
+
+type MinioBucket interface {
+	UploadFile(ctx context.Context, fileName string, file io.Reader, fileSize int64) error
+	DownloadFile(ctx context.Context, fileName string) (io.Reader, error)
+	DeleteFile(ctx context.Context, fileName string) error
+
+	UploadFileHeader(ctx context.Context, fileName string, fileHeader *multipart.FileHeader) error
+}
