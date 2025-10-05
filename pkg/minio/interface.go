@@ -12,4 +12,5 @@ type MinioBucket interface {
 	DeleteFile(ctx context.Context, fileName string) error
 
 	UploadFileHeader(ctx context.Context, fileName string, fileHeader *multipart.FileHeader) error
+	GetObjectURL(objectName string) string
 }
