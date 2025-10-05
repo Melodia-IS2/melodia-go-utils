@@ -3,6 +3,7 @@ package minio
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"mime/multipart"
 
@@ -10,11 +11,13 @@ import (
 )
 
 type MinioBucketImpl struct {
-	client     *minio.Client
-	bucketName string
+	client         *minio.Client
+	bucketName     string
+	publicEndpoint string
+	useSSL         bool
 }
 
-func NewMinioBucket(client *minio.Client, bucketName string) (MinioBucket, error) {
+func NewMinioBucket(client *minio.Client, bucketName string, publicEndpoint string, useSSL bool) (MinioBucket, error) {
 	if client == nil {
 		return nil, errors.New("client is nil")
 	}
@@ -23,8 +26,10 @@ func NewMinioBucket(client *minio.Client, bucketName string) (MinioBucket, error
 	}
 
 	return &MinioBucketImpl{
-		client:     client,
-		bucketName: bucketName,
+		client:         client,
+		bucketName:     bucketName,
+		publicEndpoint: publicEndpoint,
+		useSSL:         useSSL,
 	}, nil
 }
 
@@ -55,4 +60,17 @@ func (b *MinioBucketImpl) UploadFileHeader(ctx context.Context, fileName string,
 	}
 	defer file.Close()
 	return b.UploadFile(ctx, fileName, file, fileHeader.Size)
+}
+
+func (b *MinioBucketImpl) GetObjectURL(objectName string) string {
+	if objectName == "" {
+		return ""
+	}
+
+	protocol := "http"
+	if b.useSSL {
+		protocol = "https"
+	}
+
+	return fmt.Sprintf("%s://%s/%s/%s", protocol, b.publicEndpoint, b.bucketName, objectName)
 }
