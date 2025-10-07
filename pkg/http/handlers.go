@@ -3,6 +3,7 @@ package http
 import (
 	"errors"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"strings"
 
@@ -73,6 +74,24 @@ func ParseBody[T any](r *http.Request) (T, error) {
 		return request, pkgErrors.NewValidationError(formatValidationError(err))
 	}
 	return request, nil
+}
+
+func GetFiles(r *http.Request, maxMemory int64, fieldNames ...string) (map[string]*multipart.FileHeader, error) {
+	if err := r.ParseMultipartForm(maxMemory); err != nil {
+		return nil, err
+	}
+
+	files := make(map[string]*multipart.FileHeader)
+
+	for _, name := range fieldNames {
+		fileList, ok := r.MultipartForm.File[name]
+		if !ok || len(fileList) == 0 {
+			continue
+		}
+		files[name] = fileList[0]
+	}
+
+	return files, nil
 }
 
 func formatValidationError(err error) string {
