@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"reflect"
+	"strconv"
 	"strings"
 
 	pkgErrors "github.com/Melodia-IS2/melodia-go-utils/pkg/errors"
@@ -76,22 +78,64 @@ func ParseBody[T any](r *http.Request) (T, error) {
 	return request, nil
 }
 
-func GetFiles(r *http.Request, maxMemory int64, fieldNames ...string) (map[string]*multipart.FileHeader, error) {
-	if err := r.ParseMultipartForm(maxMemory); err != nil {
+func MapRequestForm[T any](r *http.Request, maxMemoryMB int64) (*T, error) {
+	if err := r.ParseMultipartForm(maxMemoryMB << 20); err != nil {
 		return nil, err
 	}
 
-	files := make(map[string]*multipart.FileHeader)
+	result := new(T)
+	val := reflect.ValueOf(result).Elem()
+	typ := val.Type()
 
-	for _, name := range fieldNames {
-		fileList, ok := r.MultipartForm.File[name]
-		if !ok || len(fileList) == 0 {
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		tag := field.Tag.Get("form")
+		if tag == "" {
 			continue
 		}
-		files[name] = fileList[0]
+
+		fv := val.Field(i)
+
+		switch fv.Kind() {
+		case reflect.String:
+			fv.SetString(r.FormValue(tag))
+		case reflect.Bool:
+			v := r.FormValue(tag)
+			fv.SetBool(v == "true" || v == "1")
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			v := r.FormValue(tag)
+			if v != "" {
+				num, err := strconv.ParseInt(v, 10, 64)
+				if err != nil {
+					return nil, err
+				}
+				fv.SetInt(num)
+			}
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			v := r.FormValue(tag)
+			if v != "" {
+				num, err := strconv.ParseUint(v, 10, 64)
+				if err != nil {
+					return nil, err
+				}
+				fv.SetUint(num)
+			}
+		case reflect.Ptr:
+			if fv.Type() == reflect.TypeOf(&multipart.FileHeader{}) {
+				file, header, err := r.FormFile(tag)
+				if err == nil {
+					fv.Set(reflect.ValueOf(header))
+					file.Close()
+				}
+			} else {
+				return nil, errors.New("unsupported pointer type: " + fv.Type().String())
+			}
+		default:
+			return nil, errors.New("unsupported field type: " + fv.Type().String())
+		}
 	}
 
-	return files, nil
+	return result, nil
 }
 
 func formatValidationError(err error) string {
