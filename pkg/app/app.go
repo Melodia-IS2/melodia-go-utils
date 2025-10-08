@@ -13,9 +13,8 @@ type App struct {
 }
 
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    a.router.ServeHTTP(w, r) 
+	a.router.ServeHTTP(w, r)
 }
-
 
 func (a *App) Run() error {
 	if a.port == "" {

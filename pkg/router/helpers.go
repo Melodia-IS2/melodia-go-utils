@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"mime/multipart"
 	"net/http"
+	"reflect"
 	"strconv"
 
 	pkgErrors "github.com/Melodia-IS2/melodia-go-utils/pkg/errors"
@@ -150,4 +152,3 @@ func MapFormRequest[T any](r *http.Request) (T, error) {
 
 	return request, nil
 }
-
