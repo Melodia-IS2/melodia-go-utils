@@ -25,6 +25,35 @@ func NewMinioBucket(client *minio.Client, bucketName string, publicEndpoint stri
 		return nil, errors.New("bucket name is empty")
 	}
 
+	exists, err := client.BucketExists(context.Background(), bucketName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check bucket existence: %w", err)
+	}
+
+	if !exists {
+		err = client.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create bucket: %w", err)
+		}
+
+		policy := fmt.Sprintf(`{
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {"AWS": ["*"]},
+                    "Action": ["s3:GetObject"],
+                    "Resource": ["arn:aws:s3:::%s/*"]
+                }
+            ]
+        }`, bucketName)
+
+		err = client.SetBucketPolicy(context.Background(), bucketName, policy)
+		if err != nil {
+			return nil, fmt.Errorf("failed to set bucket policy: %w", err)
+		}
+	}
+
 	return &MinioBucketImpl{
 		client:         client,
 		bucketName:     bucketName,
