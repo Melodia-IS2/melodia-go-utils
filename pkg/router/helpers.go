@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"mime/multipart"
 	"net/http"
+	"reflect"
 	"strconv"
 
 	pkgErrors "github.com/Melodia-IS2/melodia-go-utils/pkg/errors"
@@ -97,5 +99,50 @@ func MapRequest[T any](r *http.Request) (T, error) {
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return request, err
 	}
+	return request, nil
+}
+
+func MapFormRequest[T any](r *http.Request) (T, error) {
+	var request T
+	v := reflect.ValueOf(&request).Elem()
+	t := v.Type()
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		formTag := field.Tag.Get("form")
+
+		if formTag == "" {
+			continue
+		}
+
+		if field.Type == reflect.TypeOf(&multipart.FileHeader{}) {
+			if fileHeaders, ok := r.MultipartForm.File[formTag]; ok && len(fileHeaders) > 0 {
+				v.Field(i).Set(reflect.ValueOf(fileHeaders[0]))
+			}
+			continue
+		}
+
+		formValue := r.FormValue(formTag)
+		if formValue == "" {
+			continue
+		}
+
+		fieldVal := v.Field(i)
+
+		switch field.Type.Kind() {
+		case reflect.String:
+			fieldVal.SetString(formValue)
+
+		case reflect.Slice, reflect.Struct:
+			newVal := reflect.New(field.Type)
+			if err := json.Unmarshal([]byte(formValue), newVal.Interface()); err != nil {
+				return request, fmt.Errorf("failed to unmarshal JSON for field %s: %w", field.Name, err)
+			}
+			fieldVal.Set(newVal.Elem())
+
+		default:
+		}
+	}
+
 	return request, nil
 }

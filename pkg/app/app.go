@@ -12,6 +12,10 @@ type App struct {
 	port   string
 }
 
+func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	a.router.ServeHTTP(w, r)
+}
+
 func (a *App) Run() error {
 	if a.port == "" {
 		a.port = "8080"
