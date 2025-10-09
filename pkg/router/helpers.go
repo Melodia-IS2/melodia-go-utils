@@ -23,18 +23,12 @@ func JSON(w http.ResponseWriter, status int, body any) {
 	}
 }
 
-func wrapData(data any) any {
-	return map[string]any{
-		"data": data,
-	}
-}
-
 func Ok(w http.ResponseWriter, body any) {
-	JSON(w, http.StatusOK, wrapData(body))
+	JSON(w, http.StatusOK, body)
 }
 
 func Created(w http.ResponseWriter, body any) {
-	JSON(w, http.StatusCreated, wrapData(body))
+	JSON(w, http.StatusCreated, body)
 }
 
 func NoContent(w http.ResponseWriter) {
