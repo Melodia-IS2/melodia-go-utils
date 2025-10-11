@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"strings"
 
 	pkgErrors "github.com/Melodia-IS2/melodia-go-utils/pkg/errors"
 
@@ -42,6 +43,22 @@ func GetUrlParam[T any](r *http.Request, param string) (T, error) {
 	paramValue := chi.URLParam(r, param)
 	if paramValue == "" {
 		return value, errors.New("url param not found")
+	}
+	result, err := parseParam[T](paramValue)
+	if err != nil {
+		return result, pkgErrors.NewBadRequestError(err.Error())
+	}
+	return result, nil
+}
+
+func GetUrlParamOrCtx[T any](r *http.Request, param string, defaultParam string, ctxKey string) (T, error) {
+	var value T
+	paramValue := chi.URLParam(r, param)
+	if paramValue == "" {
+		return value, errors.New("url param not found")
+	}
+	if strings.EqualFold(paramValue, defaultParam) {
+		paramValue = r.Context().Value(ctxKey).(string)
 	}
 	result, err := parseParam[T](paramValue)
 	if err != nil {
