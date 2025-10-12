@@ -70,12 +70,24 @@ func (b *MinioBucketImpl) UploadFile(ctx context.Context, fileName string, file 
 	return nil
 }
 
-func (b *MinioBucketImpl) DownloadFile(ctx context.Context, fileName string) (io.Reader, error) {
+func (b *MinioBucketImpl) DownloadFile(ctx context.Context, fileName string) (ObjectData, error) {
 	obj, err := b.client.GetObject(ctx, b.bucketName, fileName, minio.GetObjectOptions{})
 	if err != nil {
-		return nil, err
+		return ObjectData{}, err
 	}
-	return obj, nil
+
+	info, err := obj.Stat()
+	if err != nil {
+		return ObjectData{}, err
+	}
+
+	return ObjectData{
+		Reader:       obj,
+		ContentType:  info.ContentType,
+		FileName:     info.UserMetadata["original_filename"],
+		Size:         info.Size,
+		UserMetadata: info.UserMetadata,
+	}, nil
 }
 
 func (b *MinioBucketImpl) DeleteFile(ctx context.Context, fileName string) error {
@@ -88,6 +100,16 @@ func (b *MinioBucketImpl) UploadFileHeader(ctx context.Context, fileName string,
 		return err
 	}
 	defer file.Close()
+
+	if opts.ContentType == "" {
+		opts.ContentType = fileHeader.Header.Get("Content-Type")
+	}
+
+	if opts.UserMetadata == nil {
+		opts.UserMetadata = map[string]string{}
+	}
+	opts.UserMetadata["original_filename"] = fileHeader.Filename
+
 	return b.UploadFile(ctx, fileName, file, fileHeader.Size, opts)
 }
 
