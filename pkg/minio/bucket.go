@@ -62,8 +62,8 @@ func NewMinioBucket(client *minio.Client, bucketName string, publicEndpoint stri
 	}, nil
 }
 
-func (b *MinioBucketImpl) UploadFile(ctx context.Context, fileName string, file io.Reader, fileSize int64) error {
-	_, err := b.client.PutObject(ctx, b.bucketName, fileName, file, fileSize, minio.PutObjectOptions{})
+func (b *MinioBucketImpl) UploadFile(ctx context.Context, fileName string, file io.Reader, fileSize int64, opts minio.PutObjectOptions) error {
+	_, err := b.client.PutObject(ctx, b.bucketName, fileName, file, fileSize, opts)
 	if err != nil {
 		return err
 	}
@@ -82,13 +82,13 @@ func (b *MinioBucketImpl) DeleteFile(ctx context.Context, fileName string) error
 	return b.client.RemoveObject(ctx, b.bucketName, fileName, minio.RemoveObjectOptions{})
 }
 
-func (b *MinioBucketImpl) UploadFileHeader(ctx context.Context, fileName string, fileHeader *multipart.FileHeader) error {
+func (b *MinioBucketImpl) UploadFileHeader(ctx context.Context, fileName string, fileHeader *multipart.FileHeader, opts minio.PutObjectOptions) error {
 	file, err := fileHeader.Open()
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	return b.UploadFile(ctx, fileName, file, fileHeader.Size)
+	return b.UploadFile(ctx, fileName, file, fileHeader.Size, opts)
 }
 
 func (b *MinioBucketImpl) GetObjectURL(objectName string) string {
