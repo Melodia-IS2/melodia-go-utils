@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Melodia-IS2/melodia-go-utils/pkg/ctx"
 	"github.com/Melodia-IS2/melodia-go-utils/pkg/errors"
 )
 
@@ -57,4 +58,72 @@ func (a *AuthMiddleware) CheckKeyValue(c context.Context, key string, validValue
 	value := c.Value(key).(string)
 
 	return slices.Contains(validValues, strings.ToUpper(value))
+}
+
+type MiddlewareValidation func(r *http.Request) error
+
+type Builder struct {
+	auth   *AuthMiddleware
+	checks []MiddlewareValidation
+}
+
+func (a *AuthMiddleware) NewBuilder() *Builder {
+	return &Builder{auth: a, checks: []MiddlewareValidation{}}
+}
+
+func (b *Builder) WithState(allowed ...string) *Builder {
+	upper := make([]string, len(allowed))
+	for i, v := range allowed {
+		upper[i] = strings.ToUpper(v)
+	}
+	b.checks = append(b.checks, func(r *http.Request) error {
+		stateVal := ctx.GetState(r.Context())
+		if !slices.Contains(upper, strings.ToUpper(string(stateVal))) {
+			return errors.NewUnauthorizedError("state not allowed")
+		}
+		return nil
+	})
+	return b
+}
+
+func (b *Builder) WithRol(allowed ...string) *Builder {
+	upper := make([]string, len(allowed))
+	for i, v := range allowed {
+		upper[i] = strings.ToUpper(v)
+	}
+	b.checks = append(b.checks, func(r *http.Request) error {
+		roleVal := ctx.GetRol(r.Context())
+		if !slices.Contains(upper, strings.ToUpper(string(roleVal))) {
+			return errors.NewUnauthorizedError("role not allowed")
+		}
+		return nil
+	})
+	return b
+}
+
+func (b *Builder) WithClaim(claimKey string, predicate func(value any) bool, errMsg string) *Builder {
+	b.checks = append(b.checks, func(r *http.Request) error {
+		value := r.Context().Value(claimKey)
+		if !predicate(value) {
+			return errors.NewUnauthorizedError(errMsg)
+		}
+		return nil
+	})
+	return b
+}
+
+func (b *Builder) WithCustom(fn func(r *http.Request) error) *Builder {
+	b.checks = append(b.checks, fn)
+	return b
+}
+
+func (b *Builder) Build(next func(w http.ResponseWriter, r *http.Request) error) func(w http.ResponseWriter, r *http.Request) error {
+	return b.auth.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) error {
+		for _, check := range b.checks {
+			if err := check(r); err != nil {
+				return err
+			}
+		}
+		return next(w, r)
+	})
 }

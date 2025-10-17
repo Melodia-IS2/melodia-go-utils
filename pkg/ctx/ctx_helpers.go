@@ -7,6 +7,24 @@ import (
 	"github.com/google/uuid"
 )
 
+type ContextState string
+
+const (
+	ContextStateActive      ContextState = "active"
+	ContextStateBlocked     ContextState = "blocked"
+	ContextStateMissingInfo ContextState = "missing_info"
+	ContextStateNoSession   ContextState = "no_session"
+)
+
+type ContextRol string
+
+const (
+	ContextRolAdmin  ContextRol = "admin"
+	ContextRolArtist ContextRol = "artist"
+	ContextRolUser   ContextRol = "user"
+	ContextRolGuest  ContextRol = "guest"
+)
+
 func GetUserID(ctx context.Context) (uuid.UUID, error) {
 	userIDStr, ok := ctx.Value("userID").(string)
 	if !ok {
@@ -26,4 +44,20 @@ func GetToken(ctx context.Context) string {
 		return ""
 	}
 	return token
+}
+
+func GetState(ctx context.Context) ContextState {
+	state, ok := ctx.Value("state").(string)
+	if !ok {
+		return ContextStateNoSession
+	}
+	return ContextState(state)
+}
+
+func GetRol(ctx context.Context) string {
+	rol, ok := ctx.Value("rol").(string)
+	if !ok {
+		return ""
+	}
+	return rol
 }
