@@ -71,10 +71,10 @@ func (a *AuthMiddleware) NewBuilder() *Builder {
 	return &Builder{auth: a, checks: []MiddlewareValidation{}}
 }
 
-func (b *Builder) WithState(allowed ...string) *Builder {
+func (b *Builder) WithState(allowed ...ctx.ContextState) *Builder {
 	upper := make([]string, len(allowed))
 	for i, v := range allowed {
-		upper[i] = strings.ToUpper(v)
+		upper[i] = strings.ToUpper(string(v))
 	}
 	b.checks = append(b.checks, func(r *http.Request) error {
 		stateVal := ctx.GetState(r.Context())
@@ -86,10 +86,10 @@ func (b *Builder) WithState(allowed ...string) *Builder {
 	return b
 }
 
-func (b *Builder) WithRol(allowed ...string) *Builder {
+func (b *Builder) WithRol(allowed ...ctx.ContextRol) *Builder {
 	upper := make([]string, len(allowed))
 	for i, v := range allowed {
-		upper[i] = strings.ToUpper(v)
+		upper[i] = strings.ToUpper(string(v))
 	}
 	b.checks = append(b.checks, func(r *http.Request) error {
 		roleVal := ctx.GetRol(r.Context())
