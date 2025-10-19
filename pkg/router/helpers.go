@@ -150,6 +150,11 @@ func MapFormRequest[T any](r *http.Request) (T, error) {
 		case reflect.String:
 			fieldVal.SetString(formValue)
 
+		case reflect.Bool:
+			lowerVal := strings.ToLower(formValue)
+			isTrue := lowerVal == "true" || lowerVal == "1"
+			fieldVal.SetBool(isTrue)
+
 		case reflect.Slice, reflect.Struct:
 			newVal := reflect.New(field.Type)
 			if err := json.Unmarshal([]byte(formValue), newVal.Interface()); err != nil {
