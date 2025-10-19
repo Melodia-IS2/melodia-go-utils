@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/Melodia-IS2/melodia-go-utils/pkg/region"
 	"github.com/google/uuid"
 )
 
@@ -60,4 +61,12 @@ func GetRol(ctx context.Context) string {
 		return ""
 	}
 	return rol
+}
+
+func GetRegion(ctx context.Context) region.Region {
+	reg, ok := ctx.Value("region").(region.Region)
+	if !ok {
+		return region.Global
+	}
+	return reg
 }
