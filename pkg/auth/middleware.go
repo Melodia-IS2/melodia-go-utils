@@ -49,7 +49,9 @@ func (a *AuthMiddleware) AuthMiddleware(next func(w http.ResponseWriter, r *http
 		ctx = context.WithValue(ctx, "state", strings.ToUpper(claims["state"].(string)))
 		ctx = context.WithValue(ctx, "rol", strings.ToUpper(claims["rol"].(string)))
 		ctx = context.WithValue(ctx, "token", token)
-
+		if _, ok := claims["region"]; ok {
+			ctx = context.WithValue(ctx, "region", claims["region"].(string))
+		}
 		return next(w, r.WithContext(ctx))
 	}
 }
