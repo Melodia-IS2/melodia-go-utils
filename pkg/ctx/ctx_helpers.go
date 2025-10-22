@@ -64,9 +64,9 @@ func GetRol(ctx context.Context) string {
 }
 
 func GetRegion(ctx context.Context) region.Region {
-	reg, ok := ctx.Value("region").(region.Region)
+	reg, ok := ctx.Value("region").(string)
 	if !ok {
 		return region.Global
 	}
-	return reg
+	return region.Region(reg)
 }
