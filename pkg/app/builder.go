@@ -1,7 +1,9 @@
 package app
 
 import (
-	"github.com/Melodia-IS2/melodia-go-utils/pkg/http"
+	"net/http"
+
+	httpUtils "github.com/Melodia-IS2/melodia-go-utils/pkg/http"
 	"github.com/Melodia-IS2/melodia-go-utils/pkg/router"
 )
 
@@ -14,9 +16,9 @@ type Builder struct {
 func NewBuilder(rtcfg *router.RouterConfig, port string) (*Builder, error) {
 	if rtcfg == nil {
 		rtcfg = &router.RouterConfig{
-			ErrorHandler:            http.ErrorHandler,
-			NotFoundHandler:         http.NotFoundHandler,
-			MethodNotAllowedHandler: http.MethodNotAllowedHandler,
+			ErrorHandler:            httpUtils.ErrorHandler,
+			NotFoundHandler:         httpUtils.NotFoundHandler,
+			MethodNotAllowedHandler: httpUtils.MethodNotAllowedHandler,
 		}
 	}
 
@@ -28,6 +30,11 @@ func NewBuilder(rtcfg *router.RouterConfig, port string) (*Builder, error) {
 
 func (b *Builder) RegisterHandler(handler router.CanRegister) *Builder {
 	handler.Register(b.router)
+	return b
+}
+
+func (b *Builder) RegisterMiddleware(middleware func(http.Handler) http.Handler) *Builder {
+	b.router.Use(middleware)
 	return b
 }
 
