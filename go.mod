@@ -3,6 +3,7 @@ module github.com/Melodia-IS2/melodia-go-utils
 go 1.24.5
 
 require (
+	github.com/Melodia-IS2/melodia-events v0.1.1
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-sql-driver/mysql v1.9.3
@@ -24,7 +25,9 @@ require (
 	github.com/minio/crc64nvme v1.0.2 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
+	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/rs/xid v1.6.0 // indirect
+	github.com/segmentio/kafka-go v0.4.49 // indirect
 	github.com/tinylib/msgp v1.3.0 // indirect
 	golang.org/x/crypto v0.39.0 // indirect
 	golang.org/x/net v0.41.0 // indirect
