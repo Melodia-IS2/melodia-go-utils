@@ -20,10 +20,10 @@ func (a *App) Run() error {
 	if a.port == "" {
 		a.port = "8080"
 	}
+	fmt.Println("Server is running on port", a.port)
 	err := http.ListenAndServe(":"+a.port, a.router)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Server is running on port", a.port)
 	return nil
 }

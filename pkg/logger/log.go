@@ -31,6 +31,7 @@ type Entry struct {
 
 type Log struct {
 	ID        string
+	AppName   string
 	Endpoint  string
 	Method    string
 	RemoteIP  string
