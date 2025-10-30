@@ -22,27 +22,27 @@ const (
 )
 
 type Entry struct {
-	Timestamp time.Time
-	Level     Level
-	Layer     Layer
-	Message   string
-	Data      any
+	Timestamp time.Time `json:"timestamp"`
+	Level     Level     `json:"level"`
+	Layer     Layer     `json:"layer"`
+	Message   string    `json:"message"`
+	Data      any       `json:"data"`
 }
 
 type Log struct {
-	ID        string
-	AppName   string
-	Endpoint  string
-	Method    string
-	RemoteIP  string
-	UserAgent string
+	ID        string `json:"id"`
+	AppName   string `json:"app_name"`
+	Endpoint  string `json:"endpoint"`
+	Method    string `json:"method"`
+	RemoteIP  string `json:"remote_ip"`
+	UserAgent string `json:"user_agent"`
 
-	Status   int
-	Bytes    int
-	Duration time.Duration
+	Status   int           `json:"status"`
+	Bytes    int           `json:"bytes"`
+	Duration time.Duration `json:"duration"`
 
-	Timestamp time.Time
-	Entries   []Entry
+	Timestamp time.Time `json:"timestamp"`
+	Entries   []Entry   `json:"entries"`
 }
 
 type ctxKey string
