@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	pkgErrors "github.com/Melodia-IS2/melodia-go-utils/pkg/errors"
 
@@ -102,6 +103,12 @@ func parseParam[T any](paramValue string) (T, error) {
 		v, err := strconv.ParseBool(paramValue)
 		if err != nil {
 			return value, fmt.Errorf("invalid value: %s. Expected bool", paramValue)
+		}
+		anyValue = v
+	case time.Time:
+		v, err := time.Parse(time.RFC3339, paramValue)
+		if err != nil {
+			return value, fmt.Errorf("invalid value: %s. Expected time", paramValue)
 		}
 		anyValue = v
 	default:
