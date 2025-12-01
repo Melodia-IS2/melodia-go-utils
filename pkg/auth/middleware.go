@@ -11,11 +11,23 @@ import (
 	"github.com/Melodia-IS2/melodia-go-utils/pkg/errors"
 )
 
+type AuthMiddlewareInterface interface {
+	NewBuilder() BuilderInterface
+}
+
+type BuilderInterface interface {
+	WithState(allowed ...ctx.ContextState) BuilderInterface
+	WithRol(allowed ...ctx.ContextRol) BuilderInterface
+	WithClaim(claimKey string, predicate func(value any) bool, errMsg string) BuilderInterface
+	WithCustom(fn func(r *http.Request) error) BuilderInterface
+	Build(next func(w http.ResponseWriter, r *http.Request) error) func(w http.ResponseWriter, r *http.Request) error
+}
+
 type AuthMiddleware struct {
 	JWTSecretKey string
 }
 
-func NewAuthMiddleware(secretKey string) *AuthMiddleware {
+func NewAuthMiddleware(secretKey string) AuthMiddlewareInterface {
 	return &AuthMiddleware{JWTSecretKey: secretKey}
 }
 
@@ -69,11 +81,11 @@ type Builder struct {
 	checks []MiddlewareValidation
 }
 
-func (a *AuthMiddleware) NewBuilder() *Builder {
+func (a *AuthMiddleware) NewBuilder() BuilderInterface {
 	return &Builder{auth: a, checks: []MiddlewareValidation{}}
 }
 
-func (b *Builder) WithState(allowed ...ctx.ContextState) *Builder {
+func (b *Builder) WithState(allowed ...ctx.ContextState) BuilderInterface {
 	upper := make([]string, len(allowed))
 	for i, v := range allowed {
 		upper[i] = strings.ToUpper(string(v))
@@ -88,7 +100,7 @@ func (b *Builder) WithState(allowed ...ctx.ContextState) *Builder {
 	return b
 }
 
-func (b *Builder) WithRol(allowed ...ctx.ContextRol) *Builder {
+func (b *Builder) WithRol(allowed ...ctx.ContextRol) BuilderInterface {
 	upper := make([]string, len(allowed))
 	for i, v := range allowed {
 		upper[i] = strings.ToUpper(string(v))
@@ -103,7 +115,7 @@ func (b *Builder) WithRol(allowed ...ctx.ContextRol) *Builder {
 	return b
 }
 
-func (b *Builder) WithClaim(claimKey string, predicate func(value any) bool, errMsg string) *Builder {
+func (b *Builder) WithClaim(claimKey string, predicate func(value any) bool, errMsg string) BuilderInterface {
 	b.checks = append(b.checks, func(r *http.Request) error {
 		value := r.Context().Value(claimKey)
 		if !predicate(value) {
@@ -114,7 +126,7 @@ func (b *Builder) WithClaim(claimKey string, predicate func(value any) bool, err
 	return b
 }
 
-func (b *Builder) WithCustom(fn func(r *http.Request) error) *Builder {
+func (b *Builder) WithCustom(fn func(r *http.Request) error) BuilderInterface {
 	b.checks = append(b.checks, fn)
 	return b
 }
