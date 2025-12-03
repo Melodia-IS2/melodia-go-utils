@@ -10,6 +10,8 @@ type Level string
 const (
 	Debug Level = "DEBUG"
 	Audit Level = "AUDIT"
+	INFO  Level = "INFO"
+	Warn  Level = "WARN"
 	Error Level = "ERROR"
 )
 
