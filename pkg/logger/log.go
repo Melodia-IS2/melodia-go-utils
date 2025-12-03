@@ -19,6 +19,7 @@ const (
 	LayerHandler    Layer = "HANDLER"
 	LayerService    Layer = "SERVICE"
 	LayerRepository Layer = "REPOSITORY"
+	LayerApp        Layer = "APP"
 )
 
 type Entry struct {
