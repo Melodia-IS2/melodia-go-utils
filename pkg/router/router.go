@@ -113,6 +113,10 @@ func (rt *Router) Delete(path string, handler func(w http.ResponseWriter, r *htt
 	rt.router.Delete(path, rt.executeHandler(handler))
 }
 
+func (rt *Router) Patch(path string, handler func(w http.ResponseWriter, r *http.Request) error) {
+	rt.router.Patch(path, rt.executeHandler(handler))
+}
+
 type CanRegister interface {
 	Register(rt *Router)
 }
