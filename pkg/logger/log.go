@@ -10,7 +10,7 @@ type Level string
 const (
 	Debug Level = "DEBUG"
 	Audit Level = "AUDIT"
-	INFO  Level = "INFO"
+	Info  Level = "INFO"
 	Warn  Level = "WARN"
 	Error Level = "ERROR"
 )
@@ -23,6 +23,18 @@ const (
 	LayerRepository Layer = "REPOSITORY"
 	LayerApp        Layer = "APP"
 )
+
+type LogError struct {
+	Err   error
+	Level Level
+	Layer Layer
+}
+
+func (e LogError) Error() string { return e.Err.Error() }
+
+func WrapError(err error, level Level, layer Layer) error {
+	return LogError{Err: err, Level: level, Layer: layer}
+}
 
 type Entry struct {
 	Timestamp time.Time `json:"timestamp"`
